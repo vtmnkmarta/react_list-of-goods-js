@@ -16,8 +16,8 @@ export const goodsFromServer = [
   'Garlic',
 ];
 
-const SORT_FILED_ALPHABETYCALY = 'alphabetically';
-const SORT_FILED_LENGTH = 'length';
+const SORT_FIELD_ALPHABETYCALY = 'alphabetically';
+const SORT_FIELD_LENGTH = 'length';
 
 function getPreparedGoods(goods, { sortFiled, reversed }) {
   let preparedGoods = [...goods];
@@ -25,10 +25,10 @@ function getPreparedGoods(goods, { sortFiled, reversed }) {
   if (sortFiled) {
     preparedGoods.sort((good1, good2) => {
       switch (sortFiled) {
-        case SORT_FILED_ALPHABETYCALY:
+        case SORT_FIELD_ALPHABETYCALY:
           return good1.localeCompare(good2);
 
-        case SORT_FILED_LENGTH:
+        case SORT_FIELD_LENGTH:
           return good1.length - good2.length;
 
         default:
@@ -45,13 +45,22 @@ function getPreparedGoods(goods, { sortFiled, reversed }) {
 }
 
 export const App = () => {
-  const [sortFiled, setSortFiled] = useState('');
+  const [sortField, setSortFiled] = useState('');
   const [reversed, setReversed] = useState(false);
-  const visibileGoods = getPreparedGoods(goodsFromServer, {
-    sortFiled,
+  const [initialGoods] = useState(goodsFromServer);
+  const visibleGoods = getPreparedGoods(goodsFromServer, {
+    sortFiled: sortField,
     reversed,
   });
 
+  const isDifferent = !initialGoods.every(
+    (good, i) => good === visibleGoods[i],
+  );
+
+  const handleSortAlphabetically = () => setSortFiled(SORT_FIELD_ALPHABETYCALY);
+
+  const handleSortByLength = () => setSortFiled(SORT_FIELD_LENGTH);
+  const handleReverse = () => setReversed(!reversed);
   const handleReset = () => {
     setSortFiled('');
     setReversed(false);
@@ -62,9 +71,9 @@ export const App = () => {
       <div className="buttons">
         <button
           type="button"
-          onClick={() => setSortFiled(SORT_FILED_ALPHABETYCALY)}
+          onClick={handleSortAlphabetically}
           className={cn('button', 'is-info', {
-            'is-light': sortFiled !== SORT_FILED_ALPHABETYCALY,
+            'is-light': sortField !== SORT_FIELD_ALPHABETYCALY,
           })}
         >
           Sort alphabetically
@@ -72,9 +81,9 @@ export const App = () => {
 
         <button
           type="button"
-          onClick={() => setSortFiled(SORT_FILED_LENGTH)}
+          onClick={handleSortByLength}
           className={cn('button', 'is-success', {
-            'is-light': sortFiled !== SORT_FILED_LENGTH,
+            'is-light': sortField !== SORT_FIELD_LENGTH,
           })}
         >
           Sort by length
@@ -82,15 +91,15 @@ export const App = () => {
 
         <button
           type="button"
-          onClick={() => setReversed(!reversed)}
-          className={cn('button', 'is-is-warning', {
-            'is-light': reversed === false,
+          onClick={handleReverse}
+          className={cn('button', 'is-warning', {
+            'is-light': !reversed,
           })}
         >
           Reverse
         </button>
 
-        {(sortFiled !== '' || reversed !== false) && (
+        {isDifferent && (
           <button
             type="button"
             onClick={handleReset}
@@ -102,7 +111,7 @@ export const App = () => {
       </div>
 
       <ul>
-        {visibileGoods.map(good => (
+        {visibleGoods.map(good => (
           <li data-cy="Good" key={good}>
             {good}
           </li>
